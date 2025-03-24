@@ -14,8 +14,8 @@ which is included as part of this source code package.
 #include <vikit/camera_loader.h>
 
 using namespace Sophus;
-LIVMapper::LIVMapper(rclcpp::Node::SharedPtr &node, std::string node_name)
-    : node(std::make_shared<rclcpp::Node>(node_name)),
+LIVMapper::LIVMapper(rclcpp::Node::SharedPtr &node, std::string node_name, const rclcpp::NodeOptions & options)
+    : node(std::make_shared<rclcpp::Node>(node_name, options)),
       extT(0, 0, 0),
       extR(M3D::Identity())
 {
@@ -53,61 +53,75 @@ LIVMapper::~LIVMapper() {}
 void LIVMapper::readParameters(rclcpp::Node::SharedPtr &node)
 {
   // declare parameters
-  this->node->declare_parameter<std::string>("common.lid_topic", "/livox/lidar");
-  this->node->declare_parameter<std::string>("common.imu_topic", "/livox/imu");
-  this->node->declare_parameter<bool>("common.ros_driver_bug_fix", false);
-  this->node->declare_parameter<int>("common.img_en", 1);
-  this->node->declare_parameter<int>("common.lidar_en", 1);
-  this->node->declare_parameter<std::string>("common.img_topic", "/left_camera/image");
+  auto try_declare = [node]<typename ParameterT>(const std::string & name,
+    const ParameterT & default_value)
+  {
+    if (!node->has_parameter(name))
+    {
+      return node->declare_parameter<ParameterT>(name, default_value);
+    }
+    else
+    {
+      return node->get_parameter(name).get_value<ParameterT>();
+    }
+  };
 
-  this->node->declare_parameter<bool>("vio.normal_en", true);
-  this->node->declare_parameter<bool>("vio.inverse_composition_en", false);
-  this->node->declare_parameter<int>("vio.max_iterations", 5);
-  this->node->declare_parameter<int>("vio.img_point_cov", 100);
-  this->node->declare_parameter<bool>("vio.raycast_en", false);
-  this->node->declare_parameter<bool>("vio.exposure_estimate_en", true);
-  this->node->declare_parameter<double>("vio.inv_expo_cov", 0.1);
-  this->node->declare_parameter<int>("vio.grid_size", 5);
-  this->node->declare_parameter<int>("vio.grid_n_height", 17);
-  this->node->declare_parameter<int>("vio.patch_pyrimid_level", 4);
-  this->node->declare_parameter<int>("vio.patch_size", 8);
-  this->node->declare_parameter<int>("vio.outlier_threshold", 100);
-  this->node->declare_parameter<double>("time_offset.exposure_time_init", 0.0);
-  this->node->declare_parameter<double>("time_offset.img_time_offset", 0.0);
-  this->node->declare_parameter<bool>("uav.imu_rate_odom", false);
-  this->node->declare_parameter<bool>("uav.gravity_align_en", false);
+  // declare parameter
+  try_declare.template operator()<std::string>("common.lid_topic", "/livox/lidar");
+  try_declare.template operator()<std::string>("common.imu_topic", "/livox/imu");
+  try_declare.template operator()<bool>("common.ros_driver_bug_fix", false);
+  try_declare.template operator()<int>("common.img_en", 1);
+  try_declare.template operator()<int>("common.lidar_en", 1);
+  try_declare.template operator()<std::string>("common.img_topic", "/left_camera/image");
 
-  this->node->declare_parameter<std::string>("evo.seq_name", "01");
-  this->node->declare_parameter<bool>("evo.pose_output_en", false);
-  this->node->declare_parameter<double>("imu.gyr_cov", 1.0);
-  this->node->declare_parameter<double>("imu.acc_cov", 1.0);
-  this->node->declare_parameter<int>("imu.imu_int_frame", 30);
-  this->node->declare_parameter<bool>("imu.imu_en", true);
-  this->node->declare_parameter<bool>("imu.gravity_est_en", true);
-  this->node->declare_parameter<bool>("imu.ba_bg_est_en", true);
+  try_declare.template operator()<bool>("vio.normal_en", true);
+  try_declare.template operator()<bool>("vio.inverse_composition_en", false);
+  try_declare.template operator()<int>("vio.max_iterations", 5);
+  try_declare.template operator()<int>("vio.img_point_cov", 100);
+  try_declare.template operator()<bool>("vio.raycast_en", false);
+  try_declare.template operator()<bool>("vio.exposure_estimate_en", true);
+  try_declare.template operator()<double>("vio.inv_expo_cov", 0.1);
+  try_declare.template operator()<int>("vio.grid_size", 5);
+  try_declare.template operator()<int>("vio.grid_n_height", 17);
+  try_declare.template operator()<int>("vio.patch_pyrimid_level", 4);
+  try_declare.template operator()<int>("vio.patch_size", 8);
+  try_declare.template operator()<int>("vio.outlier_threshold", 100);
+  try_declare.template operator()<double>("time_offset.exposure_time_init", 0.0);
+  try_declare.template operator()<double>("time_offset.img_time_offset", 0.0);
+  try_declare.template operator()<bool>("uav.imu_rate_odom", false);
+  try_declare.template operator()<bool>("uav.gravity_align_en", false);
 
-  this->node->declare_parameter<double>("preprocess.blind", 0.01);
-  this->node->declare_parameter<double>("preprocess.filter_size_surf", 0.5);
-  this->node->declare_parameter<int>("preprocess.lidar_type", AVIA);
-  this->node->declare_parameter<int>("preprocess.scan_line",6);
-  this->node->declare_parameter<int>("preprocess.point_filter_num", 3);
-  this->node->declare_parameter<bool>("preprocess.feature_extract_enabled", false);
+  try_declare.template operator()<std::string>("evo.seq_name", "01");
+  try_declare.template operator()<bool>("evo.pose_output_en", false);
+  try_declare.template operator()<double>("imu.gyr_cov", 1.0);
+  try_declare.template operator()<double>("imu.acc_cov", 1.0);
+  try_declare.template operator()<int>("imu.imu_int_frame", 30);
+  try_declare.template operator()<bool>("imu.imu_en", true);
+  try_declare.template operator()<bool>("imu.gravity_est_en", true);
+  try_declare.template operator()<bool>("imu.ba_bg_est_en", true);
 
-  this->node->declare_parameter<int>("pcd_save.interval", -1);
-  this->node->declare_parameter<bool>("pcd_save.pcd_save_en", false);
-  this->node->declare_parameter<bool>("pcd_save.colmap_output_en", false);
-  this->node->declare_parameter<double>("pcd_save.filter_size_pcd", 0.5);
-  this->node->declare_parameter<vector<double>>("extrin_calib.extrinsic_T", vector<double>{});
-  this->node->declare_parameter<vector<double>>("extrin_calib.extrinsic_R", vector<double>{});
-  this->node->declare_parameter<vector<double>>("extrin_calib.Pcl", vector<double>{});
-  this->node->declare_parameter<vector<double>>("extrin_calib.Rcl", vector<double>{});
-  this->node->declare_parameter<double>("debug.plot_time", -10);
-  this->node->declare_parameter<int>("debug.frame_cnt", 6);
+  try_declare.template operator()<double>("preprocess.blind", 0.01);
+  try_declare.template operator()<double>("preprocess.filter_size_surf", 0.5);
+  try_declare.template operator()<int>("preprocess.lidar_type", AVIA);
+  try_declare.template operator()<int>("preprocess.scan_line",6);
+  try_declare.template operator()<int>("preprocess.point_filter_num", 3);
+  try_declare.template operator()<bool>("preprocess.feature_extract_enabled", false);
 
-  this->node->declare_parameter<double>("publish.blind_rgb_points", 0.01);
-  this->node->declare_parameter<int>("publish.pub_scan_num", 1);
-  this->node->declare_parameter<bool>("publish.pub_effect_point_en", false);
-  this->node->declare_parameter<bool>("publish.dense_map_en", false);
+  try_declare.template operator()<int>("pcd_save.interval", -1);
+  try_declare.template operator()<bool>("pcd_save.pcd_save_en", false);
+  try_declare.template operator()<bool>("pcd_save.colmap_output_en", false);
+  try_declare.template operator()<double>("pcd_save.filter_size_pcd", 0.5);
+  try_declare.template operator()<vector<double>>("extrin_calib.extrinsic_T", vector<double>{});
+  try_declare.template operator()<vector<double>>("extrin_calib.extrinsic_R", vector<double>{});
+  try_declare.template operator()<vector<double>>("extrin_calib.Pcl", vector<double>{});
+  try_declare.template operator()<vector<double>>("extrin_calib.Rcl", vector<double>{});
+  try_declare.template operator()<double>("debug.plot_time", -10);
+  try_declare.template operator()<int>("debug.frame_cnt", 6);
+
+  try_declare.template operator()<double>("publish.blind_rgb_points", 0.01);
+  try_declare.template operator()<int>("publish.pub_scan_num", 1);
+  try_declare.template operator()<bool>("publish.pub_effect_point_en", false);
+  try_declare.template operator()<bool>("publish.dense_map_en", false);
 
   // get parameter
   this->node->get_parameter("common.lid_topic", lid_topic);
@@ -182,7 +196,7 @@ void LIVMapper::initializeComponents(rclcpp::Node::SharedPtr &node)
   voxelmap_manager->extT_ << VEC_FROM_ARRAY(extrinT);
   voxelmap_manager->extR_ << MAT_FROM_ARRAY(extrinR);
 
-  if (!vk::camera_loader::loadFromRosNs(this->node, "parameter_blackboard", vio_manager->cam)) throw std::runtime_error("Camera model not correctly specified.");
+  if (!vk::camera_loader::loadFromRosNs(this->node, "camera", vio_manager->cam)) throw std::runtime_error("Camera model not correctly specified.");
 
   vio_manager->grid_size = grid_size;
   vio_manager->patch_size = patch_size;

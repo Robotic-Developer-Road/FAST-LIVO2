@@ -35,22 +35,35 @@ void calcBodyCov(Eigen::Vector3d &pb, const float range_inc, const float degree_
 
 void loadVoxelConfig(rclcpp::Node::SharedPtr &node, VoxelMapConfig &voxel_config)
 {
+  auto try_declare = [node]<typename ParameterT>(const std::string & name,
+    const ParameterT & default_value)
+  {
+    if (!node->has_parameter(name))
+    {
+      return node->declare_parameter<ParameterT>(name, default_value);
+    }
+    else
+    {
+      return node->get_parameter(name).get_value<ParameterT>();
+    }
+  };
+
   // declare parameter
-  node->declare_parameter<bool>("publish.pub_plane_en", false);
-  node->declare_parameter<int>("lio.max_layer", 1);
-  node->declare_parameter<double>("lio.voxel_size", 0.5);
-  node->declare_parameter<double>("lio.min_eigen_value", 0.01);
-  node->declare_parameter<double>("lio.sigma_num", 3);
-  node->declare_parameter<double>("lio.beam_err", 0.02);
-  node->declare_parameter<double>("lio.dept_err", 0.05);
+  try_declare.template operator()<bool>("publish.pub_plane_en", false);
+  try_declare.template operator()<int>("lio.max_layer", 1);
+  try_declare.template operator()<double>("lio.voxel_size", 0.5);
+  try_declare.template operator()<double>("lio.min_eigen_value", 0.01);
+  try_declare.template operator()<double>("lio.sigma_num", 3);
+  try_declare.template operator()<double>("lio.beam_err", 0.02);
+  try_declare.template operator()<double>("lio.dept_err", 0.05);
 
   // Declaration of parameter of type std::vector<int> won't build, https://github.com/ros2/rclcpp/issues/1585  
-  node->declare_parameter<vector<int64_t>>("lio.layer_init_num", std::vector<int64_t>{5,5,5,5,5}); 
-  node->declare_parameter<int>("lio.max_points_num", 50);
-  node->declare_parameter<int>("lio.min_iterations", 5);
-  node->declare_parameter<bool>("local_map.map_sliding_en", false);
-  node->declare_parameter<int>("local_map.half_map_size", 100);
-  node->declare_parameter<double>("local_map.sliding_thresh", 8.0);
+  try_declare.template operator()<vector<int64_t>>("lio.layer_init_num", std::vector<int64_t>{5,5,5,5,5}); 
+  try_declare.template operator()<int>("lio.max_points_num", 50);
+  try_declare.template operator()<int>("lio.min_iterations", 5);
+  try_declare.template operator()<bool>("local_map.map_sliding_en", false);
+  try_declare.template operator()<int>("local_map.half_map_size", 100);
+  try_declare.template operator()<double>("local_map.sliding_thresh", 8.0);
 
   // get parameter
   node->get_parameter("publish.pub_plane_en", voxel_config.is_pub_plane_map_);

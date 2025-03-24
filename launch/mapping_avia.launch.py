@@ -60,18 +60,6 @@ def generate_launch_description():
         #     shell=True
         # ),
 
-        # use parameter_blackboard as global parameters server and load camera params
-        Node(
-            package='demo_nodes_cpp',
-            executable='parameter_blackboard',
-            name='parameter_blackboard',
-            # namespace='laserMapping',
-            parameters=[
-                camera_params_file,
-            ],
-            output='screen'
-        ),
-
         # republish compressed image to raw image
         # https://robotics.stackexchange.com/questions/110939/how-do-i-remap-compressed-video-to-raw-video-in-ros2
         # ros2 run image_transport republish compressed raw --ros-args --remap in:=/left_camera/image --remap out:=/left_camera/image
@@ -97,6 +85,7 @@ def generate_launch_description():
             name="laserMapping",
             parameters=[
                 avia_params_file,
+                camera_params_file,
             ],
             # https://docs.ros.org/en/humble/How-To-Guides/Getting-Backtraces-in-ROS-2.html
             prefix=[
