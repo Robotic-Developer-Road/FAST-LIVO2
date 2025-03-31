@@ -179,6 +179,8 @@ void LIVMapper::readParameters(rclcpp::Node::SharedPtr &node)
   this->node->get_parameter("publish.pub_scan_num", pub_scan_num);
   this->node->get_parameter("publish.pub_effect_point_en", pub_effect_point_en);
   this->node->get_parameter("publish.dense_map_en", dense_map_en);
+
+  p_pre->blind_sqr = p_pre->blind * p_pre->blind;
 }
 
 void LIVMapper::initializeComponents(rclcpp::Node::SharedPtr &node) 

@@ -48,6 +48,7 @@ void Preprocess::set(bool feat_en, int lid_type, double bld, int pfilt_num)
   feature_enabled = feat_en;
   lidar_type = lid_type;
   blind = bld;
+  blind_sqr = bld * bld;
   point_filter_num = pfilt_num;
 }
 
@@ -119,6 +120,8 @@ void Preprocess::avia_handler(const livox_ros_driver2::msg::CustomMsg::SharedPtr
         pl_full[i].z = msg->points[i].z;
         pl_full[i].intensity = msg->points[i].reflectivity;
         pl_full[i].curvature = msg->points[i].offset_time / float(1000000); // use curvature as time of each laser points
+        double range = pl_full[i].x * pl_full[i].x + pl_full[i].y * pl_full[i].y + pl_full[i].z * pl_full[i].z;
+        if (range < blind_sqr) continue;
 
         bool is_new = false;
         if ((abs(pl_full[i].x - pl_full[i - 1].x) > 1e-7) || (abs(pl_full[i].y - pl_full[i - 1].y) > 1e-7) ||
