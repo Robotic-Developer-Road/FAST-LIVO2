@@ -8,6 +8,10 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+IF("$ENV{ROS_DISTRO}" STRLESS "iron")
+  add_definitions(-DPRE_ROS_IRON)
+ENDIF()
+
 # Set common compile options
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -fexceptions")
 

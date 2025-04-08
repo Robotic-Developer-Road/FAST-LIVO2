@@ -16,7 +16,11 @@ which is included as part of this source code package.
 #include "IMU_Processing.h"
 #include "vio.h"
 #include "preprocess.h"
+#ifdef PRE_ROS_IRON
+#include <cv_bridge/cv_bridge.h>
+#else
 #include <cv_bridge/cv_bridge.hpp>
+#endif
 #include <image_transport/image_transport.hpp>
 #include <tf2_ros/transform_broadcaster.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
