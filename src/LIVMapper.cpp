@@ -105,6 +105,7 @@ void LIVMapper::readParameters(rclcpp::Node::SharedPtr &node)
   try_declare.template operator()<int>("preprocess.lidar_type", AVIA);
   try_declare.template operator()<int>("preprocess.scan_line",6);
   try_declare.template operator()<int>("preprocess.point_filter_num", 3);
+  try_declare.template operator()<int>("preprocess.scan_rate", 10);
   try_declare.template operator()<bool>("preprocess.feature_extract_enabled", false);
 
   try_declare.template operator()<int>("pcd_save.interval", -1);
@@ -161,6 +162,7 @@ void LIVMapper::readParameters(rclcpp::Node::SharedPtr &node)
   this->node->get_parameter("preprocess.filter_size_surf", filter_size_surf_min);
   this->node->get_parameter("preprocess.lidar_type", p_pre->lidar_type);
   this->node->get_parameter("preprocess.scan_line", p_pre->N_SCANS);
+  this->node->get_parameter("preprocess.scan_rate", p_pre->SCAN_RATE);
   this->node->get_parameter("preprocess.point_filter_num", p_pre->point_filter_num);
   this->node->get_parameter("preprocess.feature_extract_enabled", p_pre->feature_enabled);
 
