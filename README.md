@@ -67,6 +67,12 @@ OpenCV>=4.2, Follow [Opencv Installation](http://opencv.org/).
 
 ### 2.3 Sophus
 
+#### Binary installation
+```bash
+sudo apt install ros-$ROS_DISTRO-sophus
+```
+
+#### Building from source
 Sophus Installation for the non-templated/double-only version.
 
 ```bash
