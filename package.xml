@@ -34,6 +34,9 @@
   <build_depend>cv_bridge</build_depend>
   <build_depend>image_transport</build_depend>
   <build_depend>libopencv-dev</build_depend>
+  <build_depend>sophus</build_depend>
+  <build_depend>eigen</build_depend>
+  <build_depend>fmt</build_depend>
 
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>image_transport</exec_depend>

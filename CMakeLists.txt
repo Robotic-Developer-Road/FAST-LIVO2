@@ -96,6 +96,7 @@ find_package(PCL REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(Sophus REQUIRED)
 find_package(Boost REQUIRED COMPONENTS thread)
+find_package(fmt REQUIRED)
 
 # Include directories for dependencies
 include_directories(
@@ -125,7 +126,7 @@ set(dependencies
   livox_ros_driver2
 )
 
-set(COMMON_DEPENDENCIES OpenMP::OpenMP_CXX)
+set(COMMON_DEPENDENCIES OpenMP::OpenMP_CXX fmt::fmt)
 
 # link_directories(${COMMON_DEPENDENCIES}
 #   ${vikit_common_LIBRARIES}/libvikit_common.so
