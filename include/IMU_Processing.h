@@ -20,7 +20,7 @@ which is included as part of this source code package.
 #include <nav_msgs/msg/odometry.hpp>
 #include <utils/so3_math.h>
 #include <fstream>
-const bool time_list(PointType &x, PointType &y) { return (x.curvature < y.curvature); }
+extern const bool time_list(PointType &x, PointType &y);
 
 /// *************IMU Process and undistortion
 class ImuProcess

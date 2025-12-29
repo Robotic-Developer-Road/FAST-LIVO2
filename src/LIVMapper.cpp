@@ -756,6 +756,25 @@ void LIVMapper::RGBpointBodyToWorld(PointType const *const pi, PointType *const 
   po->y = p_global(1);
   po->z = p_global(2);
   po->intensity = pi->intensity;
+  po->curvature = pi->curvature;
+  po->normal_x = pi->normal_x;
+  po->normal_y = pi->normal_y;
+  po->normal_z = pi->normal_z;
+}
+
+void LIVMapper::RGBpointBodyLidarToIMU(PointType const *const pi, PointType *const po)
+{
+  V3D p_body_lidar(pi->x, pi->y, pi->z);
+  V3D p_body_imu(extR * p_body_lidar + extT);
+
+  po->x = p_body_imu(0);
+  po->y = p_body_imu(1);
+  po->z = p_body_imu(2);
+  po->intensity = pi->intensity;
+  po->curvature = pi->curvature;
+  po->normal_x = pi->normal_x;
+  po->normal_y = pi->normal_y;
+  po->normal_z = pi->normal_z;
 }
 
 void LIVMapper::standard_pcl_cbk(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &msg)

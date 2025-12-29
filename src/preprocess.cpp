@@ -707,7 +707,7 @@ void Preprocess::xt32_handler(const sensor_msgs::msg::PointCloud2::ConstSharedPt
   // pub_func(pl_surf, pub_corn, msg->header.stamp);
 }
 
-void Preprocess::robosense_handler(const sensor_msgs::PointCloud2::ConstPtr &msg)
+void Preprocess::robosense_handler(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &msg)
 {
   pl_surf.clear();
 
